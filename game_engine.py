@@ -49,7 +49,7 @@ class Player:
                 return None, None
             
         elif self.strategy == "position_search" or self.strategy == "color_search":
-            guess = self.binary_search_like_guess(remaining_colors, remaining_positions)
+            guess = self.__binary_search_like_guess(remaining_colors, remaining_positions)
             if guess:
                 return guess
             # Fallback if no guess is made
@@ -64,9 +64,10 @@ class Player:
         self.last_position_index = -1
         self.last_color_index = -1
 
-    def binary_search_like_guess(self, remaining_colors, remaining_positions):
+    def __binary_search_like_guess(self, remaining_colors, remaining_positions):
         if self.strategy == "color_search":
-            # Move to the next position in the order
+            # The search the player works through each position but just picks the first available color
+            # e.i blue 1, blue 2, blue 3 
             self.last_position_index = (self.last_position_index + 1) % len(self.position_order)
             next_position = self.position_order[self.last_position_index]
             if next_position in remaining_positions:
@@ -75,13 +76,13 @@ class Player:
                 return selected_color, selected_position
         
         elif self.strategy == "position_search":
-            # Move to the next color in the order
+            # The search the player works through each color but just picks the first available position
+            # e.i blue 1, green 1, yellow 1, 
             self.last_color_index = (self.last_color_index + 1) % len(self.color_order)
             if self.last_color_index < len(remaining_colors):
                 selected_color = remaining_colors[self.last_color_index]
                 selected_position = remaining_positions[0]  # Pick the first available position
                 return selected_color, selected_position
-
             # Reset if end of list reached or no valid guess could be made
             return None
     
@@ -94,9 +95,9 @@ class Game:
         self.positions = list(range(1, 7))  # Positions 1 through 6
         self.correct_assignments = {}
         self.round_order = []
-        self.initialize_game()
+        self.__initialize_game()
     
-    def initialize_game(self):
+    def __initialize_game(self):
         random.shuffle(self.colors)
         for position, color in zip(self.positions, self.colors):
             self.correct_assignments[position] = color
@@ -108,7 +109,7 @@ class Game:
         #############
         random.shuffle(self.colors)
 
-    def play_round(self):
+    def _play_round(self):
 
         for player in self.round_order:
             guess_color, guess_position = player.guess(self.colors, self.positions)
@@ -125,7 +126,7 @@ class Game:
         return False  # Game continues
     
     def play_game(self):
-        while not self.play_round():
+        while not self._play_round():
             pass
         game_results = {player.name: player.points for player in self.players}
         # Reset for next game
@@ -135,9 +136,9 @@ class Game:
             "red", "blue", "green", "yellow", "orange",
             "purple"]
         self.positions = list(range(1, 7))
-        self.initialize_game()
+        self.__initialize_game()
         return game_results
-
+  
 class Simulation:
     def __init__(self, num_games, players):
         self.num_games = num_games
